@@ -1,6 +1,22 @@
+from enum import Enum
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils.translation import gettext_lazy as _
+
+
+class SkillLevels(models.TextChoices):
+    BEGINNER = 'B', _('Beginner')
+    INTERMEDIATE = 'I', _('Intermediate')
+    ADVANCED = 'A', _('Advanced')
+    EXPERT = 'E', _('Expert')
+
+
+class Skill(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
 
 
 class UserManager(BaseUserManager):
@@ -35,6 +51,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager()
+    skills = models.ManyToManyField(Skill, through='UserSkill', blank=True)
 
+    objects = UserManager()
     USERNAME_FIELD = 'email'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+
+class UserSkill(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='skills_data')
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+
+    level = models.CharField(
+        max_length=1,
+        choices=SkillLevels.choices,
+        default=SkillLevels.BEGINNER)
+
+    def __str__(self):
+        return f'{self.user}_{self.skill}'
+

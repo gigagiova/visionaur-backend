@@ -1,14 +1,14 @@
 import json
 from django.contrib.auth import login
 from django.contrib.auth.hashers import check_password
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from users.models import User
-from users.serializers import UserSerializer
+from users.models import User, Skill, UserSkill
+from users.serializers import UserSerializer, SkillSerializer
 
 
 @api_view(['POST'])
@@ -18,6 +18,7 @@ def registerView(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         new_user = serializer.save()
+        print(new_user)
         if new_user:
             refresh = RefreshToken.for_user(new_user)
             return Response({
@@ -27,10 +28,10 @@ def registerView(request):
             }, status=status.HTTP_201_CREATED)
 
     # error handling
-    if serializer['email']:
+    if 'email' in serializer.errors:
         return Response({'error': 'email_taken'})
 
-    return Response({'errors': serializer.errors})
+    return Response({'error': 'generic'})
 
 
 @api_view(['POST'])
@@ -69,14 +70,33 @@ def loginView(request):
 class accountView(APIView):
 
     def put(self, request):
+
+        user_skills = UserSkill.objects.filter(user=request.user)
+        loaded_skills = json.loads(request.data['stringified_skills'])
+
+        # this block removes the skills we have not included in the last version
+        # it is placed before the block that adds new skills, because otherwise we delete what we add
+        for u in user_skills.all():
+            still_contained = False
+            for s in loaded_skills:
+                if s['skill']['id'] == u.id:
+                    # if we found the skill in the upcoming data we keep the skill
+                    still_contained = True
+            if not still_contained:
+                # we delete the skill if it is not present in the new version
+                u.delete()
+
+        # check if there are any new skills to add
+        for s in loaded_skills:
+            if not user_skills.filter(skill_id=s['skill']['id']).exists():
+                UserSkill.objects.create(user=request.user, skill_id=s["skill"]["id"], level=s["level"])
+
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            print(serializer)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        print(serializer.errors)
-        return Response({'errors': serializer.errors})
+        return Response({'errors': 'serializer.errors'})
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
@@ -88,3 +108,8 @@ def checkUsernameView(request):
         # our own username is available by definition
         return Response({'available': True})
     return Response({'available': not User.objects.filter(username=request.data['username']).exists()})
+
+
+class SkillsList(generics.ListAPIView):
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
