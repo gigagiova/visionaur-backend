@@ -46,3 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
+class MiniUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'username', 'profile_pic')

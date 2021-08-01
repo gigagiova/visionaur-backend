@@ -6,6 +6,7 @@ from . import models
 
 class SkillsInline(admin.TabularInline):
     model = models.UserSkill
+    extra = 0
 
 
 @admin.register(models.User)
