@@ -27,19 +27,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'first_name', 'last_name', 'username', 'bio', 'profile_pic', 'skills')
+        fields = ('email', 'password', 'name', 'username', 'bio', 'profile_pic', 'skills')
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         instance = self.Meta.model(**validated_data)
-
-        username = f'{instance.first_name}.{instance.last_name}'
-        username.replace(' ', '')
-        counter = 1
-        while User.objects.filter(username=username):
-            username += str(counter)
-            counter += 1
-        instance.username = username
 
         if password is not None:
             instance.set_password(password)
@@ -51,4 +43,4 @@ class MiniUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'profile_pic')
+        fields = ('name', 'username', 'profile_pic')

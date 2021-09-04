@@ -12,9 +12,9 @@ class SkillsInline(admin.TabularInline):
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
     ordering = ['id']
-    list_display = ['email', 'first_name', 'last_name']
+    list_display = ['email', 'name']
     fieldsets = (
-        (None, {'fields': ('email', 'first_name', 'last_name', 'username', 'bio', 'profile_pic', 'password',)}),
+        (None, {'fields': ('email', 'name', 'username', 'bio', 'profile_pic', 'password',)}),
         (
             _('Permissions'),
             {'fields': ('is_active', 'is_staff', 'is_superuser')}

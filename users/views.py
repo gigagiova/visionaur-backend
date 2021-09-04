@@ -1,4 +1,5 @@
 import json
+from users import auth
 from django.contrib.auth import login
 from django.contrib.auth.hashers import check_password
 from rest_framework import status, generics
@@ -96,14 +97,17 @@ class accountView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({'errors': 'serializer.errors'})
+        return Response({'errors': serializer.errors})
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
 
 @api_view(['POST'])
+@authentication_classes([auth.JWTAuthenticationSafe])
+@permission_classes([AllowAny, ])
 def checkUsernameView(request):
+    print(request.user)
     if request.user.username == request.data['username']:
         # our own username is available by definition
         return Response({'available': True})

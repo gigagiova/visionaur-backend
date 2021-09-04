@@ -42,8 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=225, unique=True)
     username = models.CharField(max_length=64, unique=True, null=True, blank=True)
-    first_name = models.CharField(max_length=35)
-    last_name = models.CharField(max_length=35)
+    name = models.CharField(max_length=35)
     bio = models.CharField(max_length=256, default='', blank=True)
     profile_pic = models.ImageField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -55,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.username
 
 
 class UserSkill(models.Model):

@@ -7,6 +7,7 @@ from users.models import User, Skill
 class Categories(models.TextChoices):
     STARTUP = 'S', _('Startup')
     NONPROFIT = 'N', _('Nonprofit')
+    SIDEPROJECT = 'P', _('Side Project')
     RESEARCH = 'R', _('Research')
 
 
@@ -36,22 +37,24 @@ class Project(models.Model):
 
     title = models.CharField(max_length=64)
     image = models.ImageField(null=True, blank=True)
-    description = models.CharField(max_length=512, default='', blank=True)
+    description = models.TextField(default='', blank=True)
     slug = models.SlugField(unique=True)
     created = models.DateTimeField(auto_now_add=True)
     team = models.ManyToManyField(User, through=UserProject)
+    repository = models.CharField(max_length=512, null=True, blank=True)
 
+    # not really useful for now
     category = models.CharField(
         max_length=1,
         choices=Categories.choices,
-        default=Categories.STARTUP)
+        default=Categories.SIDEPROJECT)
     stage = models.CharField(
         max_length=1,
         choices=Stages.choices,
         default=Stages.IDEA)
 
-    looking_for = models.CharField(max_length=512, default='', blank=True)
-    skills_needed = models.ManyToManyField(Skill)
+    looking_for = models.CharField(max_length=512, null=True, blank=True)
+    skills_needed = models.ManyToManyField(Skill, blank=True)
 
     def __str__(self):
         return self.title
