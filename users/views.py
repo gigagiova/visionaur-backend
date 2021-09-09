@@ -1,8 +1,11 @@
 import json
+
+from django.shortcuts import get_object_or_404
+
 from users import auth
 from django.contrib.auth import login
 from django.contrib.auth.hashers import check_password
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -12,10 +15,26 @@ from users.models import User, Skill, UserSkill
 from users.serializers import UserSerializer, SkillSerializer
 
 
+class UserViewSet(viewsets.ViewSet):
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    permission_classes = [AllowAny, ]
+    authentication_classes = []
+
+    def list(self, request):
+        serializer = UserSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, username=None):
+        user = get_object_or_404(self.queryset, username=username)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([AllowAny, ])
-def registerView(request):
+def register_view(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         new_user = serializer.save()

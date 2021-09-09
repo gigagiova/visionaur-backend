@@ -1,12 +1,19 @@
 from django.urls import path
-from .views import registerView, loginView, accountView, checkUsernameView, SkillsList
+from rest_framework.routers import DefaultRouter
+
+from .views import register_view, loginView, accountView, checkUsernameView, SkillsList, UserViewSet
 
 app_name = 'users'
 
+router = DefaultRouter()
+router.register('', UserViewSet, basename='users')
+
 urlpatterns = [
-    path('register/', registerView, name="register"),
+    path('register/', register_view, name="register"),
     path('login/', loginView, name="login"),
-    path('account/', accountView.as_view(), name="account"),
+    path('my-account/', accountView.as_view(), name="account"),
     path('check-username/', checkUsernameView, name='check_username'),
     path('skills/', SkillsList.as_view(), name='skills_list')
 ]
+
+urlpatterns += router.urls

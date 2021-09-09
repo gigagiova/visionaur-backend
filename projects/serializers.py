@@ -7,10 +7,12 @@ from users.models import User, Skill
 class UserProjectSerializer(serializers.ModelSerializer):
 
     user = serializers.SlugRelatedField(slug_field="username", queryset=User.objects.all())
+    image = serializers.ImageField(max_length=None, use_url=True, required=False, source='user.profile_pic')
+    name = serializers.CharField(source='user.name', read_only=True)
 
     class Meta:
         model = UserProject
-        fields = ('user', 'role')
+        fields = ('user', 'role', 'image', 'name')
 
 
 class ProjectSerializer(serializers.ModelSerializer):
