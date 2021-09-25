@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from social.models import Update
 from users.models import User, Skill
 
 
@@ -55,6 +56,14 @@ class Project(models.Model):
 
     looking_for = models.CharField(max_length=512, null=True, blank=True)
     skills_needed = models.ManyToManyField(Skill, blank=True)
+    updates = models.ManyToManyField(Update, blank=True)
 
     def __str__(self):
         return self.title
+
+    def user_role(self, user):
+        # return the role of this user, None if it is not part of the team
+        return self.members.filter(user=user).first().role
+
+    class Meta:
+        ordering = ('-created',)

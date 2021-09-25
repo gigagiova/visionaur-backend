@@ -27,6 +27,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls', namespace='users')),
     path('projects/', include('projects.urls', namespace='projects')),
+    path('challenges/', include('challenges.urls', namespace='challenges')),
+    path('social/', include('social.urls', namespace='social')),
     path('token/obtain/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

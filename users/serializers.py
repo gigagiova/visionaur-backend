@@ -24,13 +24,13 @@ class UserSkillSerializer(serializers.ModelSerializer):
 class UserProjectSerializer(serializers.ModelSerializer):
     # user's version of the user-project serializer
 
-    project = serializers.SlugRelatedField(slug_field='slug', queryset=Project.objects.all())
+    slug = serializers.CharField(source='project.slug', read_only=True)
     title = serializers.CharField(source='project.title', read_only=True)
     description = serializers.CharField(source='project.description', read_only=True)
 
     class Meta:
         model = UserProject
-        fields = ('role', 'project', 'title', 'description')
+        fields = ('role', 'slug', 'title', 'description')
 
 
 class UserSerializer(serializers.ModelSerializer):

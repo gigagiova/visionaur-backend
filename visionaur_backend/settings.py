@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'users.apps.UsersConfig',
-    'projects.apps.ProjectsConfig'
+    'projects.apps.ProjectsConfig',
+    'challenges.apps.ChallengesConfig',
+    'social.apps.SocialConfig'
 ]
 
 MIDDLEWARE = [

@@ -2,6 +2,7 @@ import json
 
 from django.shortcuts import get_object_or_404
 
+from social.serializers import NotificationSerializer
 from users import auth
 from django.contrib.auth import login
 from django.contrib.auth.hashers import check_password
@@ -57,37 +58,26 @@ def register_view(request):
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([AllowAny, ])
-def loginView(request):
+def login_view(request):
     body = json.loads(request.body)
-    try:
-        user = User.objects.get(email=body['email'])
-    except BaseException as e:
-        return Response({'error': str(e)})
+    user = User.objects.filter(email=body['email']).first()
+    if user is None:
+        return Response({'error': 'account_not_found'})
 
     if not check_password(body['password'], user.password):
-        return Response({'error': 'Incorrect Login credentials'})
+        return Response({'error': 'incorrect_credentials'})
 
-    if user:
-        login(request, user)
-        refresh = RefreshToken.for_user(user)
+    login(request, user)
+    refresh = RefreshToken.for_user(user)
 
-        print({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            **UserSerializer(user).data
-        })
-
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            **UserSerializer(user).data
-        }, status=status.HTTP_200_OK)
-
-    else:
-        return Response({'error': 'Account doesnt exist'})
+    return Response({
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+        **UserSerializer(user).data
+    }, status=status.HTTP_200_OK)
 
 
-class accountView(APIView):
+class AccountView(APIView):
 
     def put(self, request):
 
@@ -125,12 +115,17 @@ class accountView(APIView):
 @api_view(['POST'])
 @authentication_classes([auth.JWTAuthenticationSafe])
 @permission_classes([AllowAny, ])
-def checkUsernameView(request):
+def check_username_view(request):
     print(request.user)
     if request.user.username == request.data['username']:
         # our own username is available by definition
         return Response({'available': True})
     return Response({'available': not User.objects.filter(username=request.data['username']).exists()})
+
+
+@api_view(['GET'])
+def get_notifications_view(request):
+    return Response(NotificationSerializer(request.user.notifications.all(), many=True).data)
 
 
 class SkillsList(generics.ListAPIView):

@@ -53,6 +53,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
+    notifications = models.ManyToManyField('social.Notification')
+
     def __str__(self):
         return self.username
 
